@@ -30,6 +30,47 @@ inline std::ostream &operator<<(std::ostream &out, const Result &result) {
   return out;
 }
 
+#define UUR_RETURN_ON_FATAL_FAILURE(...)                                       \
+  __VA_ARGS__;                                                                 \
+  if (this->HasFatalFailure() || this->IsSkipped()) {                          \
+    return;                                                                    \
+  }                                                                            \
+  (void)0
+
+#define UUR_ASSERT_SUCCESS_OR_UNSUPPORTED(ret)                                 \
+  do {                                                                         \
+    auto status = ret;                                                         \
+    if (status == UR_RESULT_ERROR_UNSUPPORTED_FEATURE ||                       \
+        status == UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION) {                   \
+      GTEST_SKIP();                                                            \
+    } else {                                                                   \
+      ASSERT_EQ(status, UR_RESULT_SUCCESS);                                    \
+    }                                                                          \
+  } while (0)
+
+inline bool stringPropertyIsValid(const char *property,
+                                  const size_t property_size) {
+  if (!property) {
+    return property_size == 0;
+  }
+
+  if (property_size == 1) {
+    return property[0] == '\0';
+  }
+
+  if (property[property_size - 1] != '\0') {
+    return false;
+  }
+
+  for (size_t i = 0; i < property_size - 1; i++) {
+    if (property[i] == '\0') {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 } // namespace uur
 
 #ifndef ASSERT_EQ_RESULT
@@ -68,5 +109,16 @@ inline std::ostream &operator<<(std::ostream &out,
   out << uur::GetDeviceName(device);
   return out;
 }
+
+#ifndef ASSERT_GET_INFO
+#define ASSERT_GET_INFO(CALL, TYPE)                                            \
+  do {                                                                         \
+    ASSERT_SUCCESS(CALL);                                                      \
+    TYPE returned_value = property_value;                                      \
+    property_value = 1;                                                        \
+    ASSERT_SUCCESS(CALL);                                                      \
+    ASSERT_EQ(property_value, returned_value);                                 \
+  } while (0)
+#endif
 
 #endif // UR_CONFORMANCE_INCLUDE_CHECKS_H_INCLUDED

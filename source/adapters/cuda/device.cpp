@@ -286,14 +286,14 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_IMAGE_SUPPORTED: {
     bool Enabled = false;
 
-    if (std::getenv("SYCL_PI_CUDA_ENABLE_IMAGE_SUPPORT") != nullptr ||
-        std::getenv("UR_CUDA_ENABLE_IMAGE_SUPPORT") != nullptr) {
+    if (std::getenv("SYCL_PI_CUDA_ENABLE_IMAGE_SUPPORTED") != nullptr ||
+        std::getenv("UR_CUDA_ENABLE_IMAGE_SUPPORTED") != nullptr) {
       Enabled = true;
     } else {
       logger::always(
           "Images are not fully supported by the CUDA BE, their support is "
           "disabled by default. Their partial support can be activated by "
-          "setting UR_CUDA_ENABLE_IMAGE_SUPPORT environment variable at "
+          "setting UR_CUDA_ENABLE_IMAGE_SUPPORTED environment variable at "
           "runtime.");
     }
 
@@ -862,21 +862,21 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &tex_max_linear_width,
         CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_WIDTH, hDevice->get()));
-    return ReturnValue(tex_max_linear_width);
+    return ReturnValue(static_cast<size_t>(tex_max_linear_width));
   }
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_HEIGHT_EXP: {
     int32_t tex_max_linear_height = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &tex_max_linear_height,
         CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_HEIGHT, hDevice->get()));
-    return ReturnValue(tex_max_linear_height);
+    return ReturnValue(static_cast<size_t>(tex_max_linear_height));
   }
   case UR_DEVICE_INFO_MAX_IMAGE_LINEAR_PITCH_EXP: {
     int32_t tex_max_linear_pitch = 0;
     UR_CHECK_ERROR(cuDeviceGetAttribute(
         &tex_max_linear_pitch,
         CU_DEVICE_ATTRIBUTE_MAXIMUM_TEXTURE2D_LINEAR_PITCH, hDevice->get()));
-    return ReturnValue(tex_max_linear_pitch);
+    return ReturnValue(static_cast<size_t>(tex_max_linear_pitch));
   }
   case UR_DEVICE_INFO_MIPMAP_SUPPORT_EXP: {
     // CUDA supports mipmaps.
